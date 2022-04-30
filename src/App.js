@@ -19,7 +19,7 @@ var g_socket = null;
 
 var message_handler = function (e) {
   const data = JSON.parse(e.data);
-  switch (data[0].responseType) {
+  switch (data.responseType) {
 
     case "nameSetSuccess":
       console.log("Name was set successfully")
@@ -46,28 +46,22 @@ var message_handler = function (e) {
       break;
 
     case "authSuccessful":
-      window.localStorage.setItem("userID", data[0].uuid)
-      actions.setUserID(data[0].uuid)
-      actions.setUserMaxTiles(data[0].maxTiles)
-      actions.setUserTiles(data[0].remainingTiles)
-      actions.setLevel(data[0].level)
-      actions.setUserRequiredExp(data[0].tilesToNextLevel)
-      actions.setUserExp(data[0].levelProgress)
+      window.localStorage.setItem("userID", data.uuid)
+      actions.setUserID(data.uuid)
+      actions.setUserMaxTiles(data.maxTiles)
+      actions.setUserTiles(data.remainingTiles)
+      actions.setLevel(data.level)
+      actions.setUserRequiredExp(data.tilesToNextLevel)
+      actions.setUserExp(data.levelProgress)
       g_socket.send(JSON.stringify({ "requestType": "getColors", "userID": store.getState().get("userID").toString() }))
       break;
 
     case "colorList":
-      actions.setColors(data)
-      g_socket.send(JSON.stringify({ "requestType": "getCanvasBin", "userID": store.getState().get("userID").toString() }))
+      actions.setColors(data.colors)
+      g_socket.send(JSON.stringify({ "requestType": "getCanvas", "userID": store.getState().get("userID").toString() }))
       break;
 
     case "fullCanvas":
-      actions.drawCanvas(data)
-      actions.loadingScreenVisible(false)
-	  actions.setMessageBoxVisibility(false)
-      break;
-    
-    case "fullCanvasZlib":
       actions.drawCanvasBin(data)
       actions.loadingScreenVisible(false)
       actions.setMessageBoxVisibility(false)
@@ -78,23 +72,23 @@ var message_handler = function (e) {
       break;
 
     case "userCount":
-      actions.setConnectedUsers(data[0].count)
+      actions.setConnectedUsers(data.count)
       break;
 
     case "incrementTileCount":
-      actions.addUserTiles(data[0].amount)
+      actions.addUserTiles(data.amount)
       break;
 
     case "levelUp":
-      actions.setLevel(data[0].level)
-      actions.setUserMaxTiles(data[0].maxTiles)
-      actions.setUserTiles(data[0].remainingTiles)
-      actions.setUserRequiredExp(data[0].tilesToNextLevel)
-      actions.setUserExp(data[0].levelProgress)
+      actions.setLevel(data.level)
+      actions.setUserMaxTiles(data.maxTiles)
+      actions.setUserTiles(data.remainingTiles)
+      actions.setUserRequiredExp(data.tilesToNextLevel)
+      actions.setUserExp(data.levelProgress)
       break;
 
     case "error":
-      if (data[0].errorMessage === "Invalid userID") {
+      if (data.errorMessage === "Invalid userID") {
         g_socket.send(JSON.stringify({ "requestType": "initialAuth" }))
       }
       console.log(JSON.stringify(data))
@@ -102,15 +96,15 @@ var message_handler = function (e) {
 
     case "reAuthSuccessful":
       g_socket.send(JSON.stringify({ "requestType": "getColors", "userID": store.getState().get("userID").toString() }))
-      actions.setUserMaxTiles(data[0].maxTiles)
-      actions.setUserTiles(data[0].remainingTiles)
-      actions.setLevel(data[0].level)
-      actions.setUserRequiredExp(data[0].tilesToNextLevel)
-      actions.setUserExp(data[0].levelProgress)
+      actions.setUserMaxTiles(data.maxTiles)
+      actions.setUserTiles(data.remainingTiles)
+      actions.setLevel(data.level)
+      actions.setUserRequiredExp(data.tilesToNextLevel)
+      actions.setUserExp(data.levelProgress)
       break;
 
     default:
-      console.log("g_socket onMessage default case!")
+      console.log("Unknown response received:")
       console.log(JSON.stringify(data))
   }
   return false;
